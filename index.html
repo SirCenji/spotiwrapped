@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tahmin Et - Dikey Görseller</title>
+    <title>Tahmin Et - Zoom Özellikli</title>
     <style>
         /* --- GENEL TASARIM --- */
         :root {
@@ -26,7 +26,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Arka plana hafif bir desen */
             background-image: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.05) 0%, transparent 60%);
         }
 
@@ -70,24 +69,44 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* --- 2. OYUN EKRANI (Dikey Ayarlı) --- */
+        /* --- 2. OYUN EKRANI --- */
         #game-image-wrapper {
             position: relative;
             width: 100%;
-            /* Dikey fotoğraflar için genişliği kısıtlayıp boyu uzattık */
-            max-width: 450px; 
+            max-width: 450px; /* Dikey Resim Genişliği */
             height: 70vh; 
             border-radius: 15px;
             overflow: hidden;
             background: #000;
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             border: 1px solid rgba(255,255,255,0.1);
+            cursor: zoom-in; /* İmleç büyüteç olur */
+            transition: border-color 0.3s;
         }
         
+        #game-image-wrapper:hover {
+            border-color: var(--accent-color);
+        }
+
         #game-image { 
             width: 100%; 
             height: 100%; 
-            object-fit: contain; /* Resmi kesmeden sığdır */
+            object-fit: contain; 
+        }
+
+        /* Resim üzerindeki "Büyüt" yazısı */
+        .zoom-hint {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .input-group {
@@ -95,7 +114,7 @@
             gap: 10px;
             margin-top: 20px;
             width: 100%;
-            max-width: 450px; /* Resim genişliğiyle aynı yaptık */
+            max-width: 450px;
         }
         
         input[type="text"] {
@@ -110,12 +129,11 @@
         }
         input[type="text"]:focus { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.1); }
 
-        /* --- 3. SONUÇ EKRANI (Dikey Grid) --- */
+        /* --- 3. SONUÇ EKRANI --- */
         #result-screen { justify-content: flex-start; overflow-y: auto; padding-top: 40px; }
         
         .grid-container {
             display: grid;
-            /* Kart genişliğini azalttık (min 160px) */
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
             gap: 20px;
             width: 100%;
@@ -136,35 +154,38 @@
         
         .result-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
         
-        .result-card img { 
-            width: 100%; 
-            /* Kart resim yüksekliğini artırdık (Dikey görünüm için) */
-            height: 280px; 
-            object-fit: cover; 
-        }
+        .result-card img { width: 100%; height: 280px; object-fit: cover; }
         
         .card-info { padding: 12px; font-size: 0.9rem; text-align: center; }
         
         .correct { border-bottom: 4px solid var(--success-color); }
         .wrong { border-bottom: 4px solid var(--error-color); }
 
-        /* --- 4. MODAL --- */
+        /* --- 4. MODAL (ORTAK TAM EKRAN) --- */
         #modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.95); display: none; z-index: 100;
             flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s;
         }
-        #modal.open { display: flex; }
+        #modal.open { display: flex; opacity: 1; }
         
         #modal img { 
-            /* Modal resmi de dikey sınırlara uysun */
-            max-height: 80vh; 
-            max-width: 90vw; 
+            max-height: 85vh; 
+            max-width: 95vw; 
             border-radius: 10px; 
-            box-shadow: 0 0 30px rgba(56,189,248,0.2); 
+            box-shadow: 0 0 40px rgba(0,0,0,0.8); 
         }
         
-        #close-btn { position: absolute; top: 20px; right: 30px; font-size: 3rem; cursor: pointer; color: #fff; }
+        /* Modal içindeki metin alanı */
+        #modal-details {
+            text-align: center; 
+            margin-top: 20px;
+            display: none; /* Varsayılan olarak gizli (oyun modunda açılmasın diye) */
+        }
+
+        #close-btn { position: absolute; top: 20px; right: 30px; font-size: 3rem; cursor: pointer; color: #fff; z-index: 101; }
+        #close-btn:hover { color: var(--error-color); }
 
     </style>
 </head>
@@ -177,8 +198,9 @@
     </div>
 
     <div id="game-screen" class="screen">
-        <div id="game-image-wrapper">
+        <div id="game-image-wrapper" onclick="openGameZoom()">
             <img id="game-image" src="" alt="Soru">
+            <div class="zoom-hint">🔍 Büyüt</div>
         </div>
         
         <div class="input-group">
@@ -197,7 +219,8 @@
     <div id="modal">
         <span id="close-btn" onclick="closeModal()">&times;</span>
         <img id="modal-img" src="">
-        <div style="text-align: center; margin-top: 20px;">
+        
+        <div id="modal-details">
             <h2 id="modal-real" style="color: var(--accent-color); font-size: 1.8rem;"></h2>
             <p id="modal-guess" style="color: #ccc; font-size: 1.2rem; margin-top: 5px;"></p>
         </div>
@@ -205,25 +228,19 @@
 
     <script>
         // ==========================================================
-        // DÜZENLEME ALANI: Dikey resimlerinin adlarını buraya gir.
-        // html dosyası ile resimler aynı klasörde olsun.
+        // DÜZENLEME ALANI
         // ==========================================================
         const gameData = [
-            { 
-                id: 1, 
-                image: "burak.jpg",  
-                owner: "Ahmet" 
-            },
-            { 
-                id: 2, 
-                image: "kübra.jpg", 
-                owner: "Kübra"
-            },
-            { 
-                id: 3, 
-                image: "foto3.jpg", 
-                owner: "Mehmet" 
-            }
+            { id: 1, image: "burak.jpg", owner: "Burak" },
+            { id: 2, image: "kübra.jpg", owner: "Kübra" },
+            { id: 3, image: "emrecan.jpg", owner: "Emrecan" },
+            { id: 4, image: "kadir.jpg", owner: "Kadir" },
+            { id: 5, image: "busra.jpg", owner: "Büşra" },
+            { id: 6, image: "Alp.jpg", owner: "Alp" },
+            { id: 7, image: "Cino.jpg", owner: "Cino" },
+            { id: 8, image: "kuzey.jpg", owner: "Kuzey" },
+            { id: 9, image: "emrecan.jpg", owner: "Emrecan" }
+            
         ];
         // ==========================================================
 
@@ -284,7 +301,9 @@
 
                 const card = document.createElement('div');
                 card.className = `result-card ${statusClass}`;
-                card.onclick = () => openModal(item, guess);
+                
+                // Sonuç ekranında tıklayınca sonuç moduyla aç
+                card.onclick = () => openResultModal(item, guess);
 
                 card.innerHTML = `
                     <img src="${item.image}">
@@ -299,11 +318,30 @@
             showScreen('result-screen');
         }
 
-        function openModal(item, guess) {
+        // --- OYUN SIRASINDA ZOOM ---
+        function openGameZoom() {
             const modal = document.getElementById('modal');
+            const currentImgSrc = gameData[currentIndex].image;
+            
+            document.getElementById('modal-img').src = currentImgSrc;
+            
+            // Cevapları GİZLE
+            document.getElementById('modal-details').style.display = 'none';
+            
+            modal.classList.add('open');
+        }
+
+        // --- SONUÇ EKRANINDA ZOOM ---
+        function openResultModal(item, guess) {
+            const modal = document.getElementById('modal');
+            
             document.getElementById('modal-img').src = item.image;
             document.getElementById('modal-real').innerText = "Gerçek Sahip: " + item.owner;
             document.getElementById('modal-guess').innerText = "Senin Tahminin: " + guess;
+            
+            // Cevapları GÖSTER
+            document.getElementById('modal-details').style.display = 'block';
+            
             modal.classList.add('open');
         }
 
@@ -311,6 +349,7 @@
             document.getElementById('modal').classList.remove('open');
         }
         
+        // Boşluğa tıklayınca kapat
         document.getElementById('modal').addEventListener('click', (e) => {
             if(e.target.id === 'modal') closeModal();
         });

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tahmin Et - Dikey Görseller</title>
+    <style>
+        /* --- GENEL TASARIM --- */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.8);
+            --accent-color: #38bdf8;
+            --text-color: #f1f5f9;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Arka plana hafif bir desen */
+            background-image: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.05) 0%, transparent 60%);
+        }
+
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+            padding: 20px;
+        }
+
+        .screen.active { display: flex; opacity: 1; z-index: 10; }
+
+        .btn {
+            padding: 12px 40px;
+            font-size: 1.2rem;
+            border: none;
+            border-radius: 50px;
+            background: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5); }
+
+        /* --- 1. GİRİŞ EKRANI --- */
+        #start-screen h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- 2. OYUN EKRANI (Dikey Ayarlı) --- */
+        #game-image-wrapper {
+            position: relative;
+            width: 100%;
+            /* Dikey fotoğraflar için genişliği kısıtlayıp boyu uzattık */
+            max-width: 450px; 
+            height: 70vh; 
+            border-radius: 15px;
+            overflow: hidden;
+            background: #000;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        #game-image { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: contain; /* Resmi kesmeden sığdır */
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 450px; /* Resim genişliğiyle aynı yaptık */
+        }
+        
+        input[type="text"] {
+            flex: 1;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            outline: none;
+            font-size: 1.1rem;
+        }
+        input[type="text"]:focus { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.1); }
+
+        /* --- 3. SONUÇ EKRANI (Dikey Grid) --- */
+        #result-screen { justify-content: flex-start; overflow-y: auto; padding-top: 40px; }
+        
+        .grid-container {
+            display: grid;
+            /* Kart genişliğini azalttık (min 160px) */
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            padding-bottom: 50px;
+        }
+        
+        .result-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .result-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
+        
+        .result-card img { 
+            width: 100%; 
+            /* Kart resim yüksekliğini artırdık (Dikey görünüm için) */
+            height: 280px; 
+            object-fit: cover; 
+        }
+        
+        .card-info { padding: 12px; font-size: 0.9rem; text-align: center; }
+        
+        .correct { border-bottom: 4px solid var(--success-color); }
+        .wrong { border-bottom: 4px solid var(--error-color); }
+
+        /* --- 4. MODAL --- */
+        #modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); display: none; z-index: 100;
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        #modal.open { display: flex; }
+        
+        #modal img { 
+            /* Modal resmi de dikey sınırlara uysun */
+            max-height: 80vh; 
+            max-width: 90vw; 
+            border-radius: 10px; 
+            box-shadow: 0 0 30px rgba(56,189,248,0.2); 
+        }
+        
+        #close-btn { position: absolute; top: 20px; right: 30px; font-size: 3rem; cursor: pointer; color: #fff; }
+
+    </style>
+</head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <h1>Tahmin Et</h1>
+        <p style="color: #94a3b8; font-size: 1.2rem; margin-bottom: 30px;">Bu eşya kime ait?</p>
+        <button class="btn" onclick="startGame()">Oyunu Başlat</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div id="game-image-wrapper">
+            <img id="game-image" src="" alt="Soru">
+        </div>
+        
+        <div class="input-group">
+            <input type="text" id="user-guess" placeholder="Sahibini yaz..." autocomplete="off">
+            <button class="btn" onclick="submitGuess()" style="margin-top: 0; border-radius: 0 8px 8px 0;">→</button>
+        </div>
+        <p style="color: #64748b; margin-top: 15px; font-size: 0.9rem;">(Enter tuşu ile geçebilirsin)</p>
+    </div>
+
+    <div id="result-screen" class="screen">
+        <h2 style="margin-bottom: 30px; font-size: 2rem;">Sonuçlar</h2>
+        <div class="grid-container" id="results-grid"></div>
+        <button class="btn" onclick="location.reload()">Tekrar Oyna</button>
+    </div>
+
+    <div id="modal">
+        <span id="close-btn" onclick="closeModal()">&times;</span>
+        <img id="modal-img" src="">
+        <div style="text-align: center; margin-top: 20px;">
+            <h2 id="modal-real" style="color: var(--accent-color); font-size: 1.8rem;"></h2>
+            <p id="modal-guess" style="color: #ccc; font-size: 1.2rem; margin-top: 5px;"></p>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================================
+        // DÜZENLEME ALANI: Dikey resimlerinin adlarını buraya gir.
+        // html dosyası ile resimler aynı klasörde olsun.
+        // ==========================================================
+        const gameData = [
+            { 
+                id: 1, 
+                image: "burak.jpg",  
+                owner: "Ahmet" 
+            },
+            { 
+                id: 2, 
+                image: "kübra.jpg", 
+                owner: "Kübra"
+            },
+            { 
+                id: 3, 
+                image: "foto3.jpg", 
+                owner: "Mehmet" 
+            }
+        ];
+        // ==========================================================
+
+        let currentIndex = 0;
+        let userGuesses = [];
+
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        function startGame() {
+            currentIndex = 0;
+            userGuesses = [];
+            loadNextQuestion();
+            showScreen('game-screen');
+        }
+
+        function loadNextQuestion() {
+            if (currentIndex >= gameData.length) {
+                finishGame();
+                return;
+            }
+            const data = gameData[currentIndex];
+            document.getElementById('game-image').src = data.image;
+            
+            const input = document.getElementById('user-guess');
+            input.value = "";
+            input.focus();
+        }
+
+        function submitGuess() {
+            const input = document.getElementById('user-guess');
+            const val = input.value.trim();
+
+            if (val === "") {
+                alert("Lütfen bir tahmin yazın!");
+                return;
+            }
+
+            userGuesses.push(val);
+            currentIndex++;
+            loadNextQuestion();
+        }
+
+        document.getElementById('user-guess').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') submitGuess();
+        });
+
+        function finishGame() {
+            const grid = document.getElementById('results-grid');
+            grid.innerHTML = "";
+
+            gameData.forEach((item, idx) => {
+                const guess = userGuesses[idx];
+                const isCorrect = guess.toLowerCase() === item.owner.toLowerCase();
+                const statusClass = isCorrect ? 'correct' : 'wrong';
+
+                const card = document.createElement('div');
+                card.className = `result-card ${statusClass}`;
+                card.onclick = () => openModal(item, guess);
+
+                card.innerHTML = `
+                    <img src="${item.image}">
+                    <div class="card-info">
+                        <div style="color: #94a3b8;">Sen: <strong style="color: #fff;">${guess}</strong></div>
+                        <div style="color: var(--accent-color);">Gerçek: <strong>${item.owner}</strong></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            showScreen('result-screen');
+        }
+
+        function openModal(item, guess) {
+            const modal = document.getElementById('modal');
+            document.getElementById('modal-img').src = item.image;
+            document.getElementById('modal-real').innerText = "Gerçek Sahip: " + item.owner;
+            document.getElementById('modal-guess').innerText = "Senin Tahminin: " + guess;
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+        }
+        
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if(e.target.id === 'modal') closeModal();
+        });
+
+    </script>
+</body>
+</html>

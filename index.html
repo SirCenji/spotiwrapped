@@ -133,43 +133,80 @@
         }
         .btn-start:hover { transform: scale(1.02); box-shadow: 0 6px 30px rgba(29, 185, 84, 0.6); }
 
-        /* --- 2. OYUN EKRANI DÜZELTMESİ --- */
+        /* --- 2. OYUN EKRANI (GÜNCELLENDİ) --- */
+        
+        /* Yeni Üst Başlık Alanı */
+        .game-header-container {
+            width: 100%;
+            max-width: 500px; /* Resim/input alanı genişliğiyle uyumlu */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 5px;
+        }
+
+        .catolify-brand {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Turuncu İkon */
+        .spotify-icon-orange path { fill: var(--neon-orange); }
+        .spotify-icon-orange {
+            filter: drop-shadow(0 0 8px rgba(255, 107, 0, 0.6)); /* Turuncu neon parlama */
+            margin-right: 8px;
+        }
+
+        /* ÇATOLİFY Yazısı (Gradient ve Neon Çevre) */
+        .catolify-text {
+            font-size: 1.4rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            
+            /* Gradyan Metin Rengi */
+            background: linear-gradient(to right, var(--spotify-green), var(--neon-orange));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            
+            /* Neon Çevre Efekti (Drop Shadow ile) */
+            filter: drop-shadow(0 0 4px rgba(29, 185, 84, 0.5)) drop-shadow(0 0 8px rgba(255, 107, 0, 0.5));
+        }
+
+        /* Kalan Pas Bilgisi (Sağa yaslandı) */
+        .pass-info {
+             color: #aaa; font-weight: bold; font-size: 0.9rem; text-align: right;
+        }
+        .pass-info span { color: #fff; }
+
+        /* Resim Alanı */
         #game-image-wrapper {
-            /* width: 100% yerine auto kullanıyoruz ki resme yapışsın */
             width: auto;
             max-width: 100%;
-            height: 55vh; 
-            
-            display: inline-flex; /* Sadece içeriği kadar yer kapla */
+            height: 50vh; /* Yüksekliği biraz azalttık ki başlık sığsın */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             position: relative;
             cursor: zoom-in;
             margin-bottom: 20px;
-            
-            /* Çerçeve kalınlığı */
             padding: 3px; 
             border-radius: 14px;
             background: transparent;
         }
 
-        /* Resim Çerçevesi Gradyanı */
         #game-image-wrapper::before {
             content: ""; position: absolute; inset: 0; border-radius: 14px; padding: 2px;
             background: linear-gradient(135deg, var(--spotify-green), var(--neon-orange));
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor; mask-composite: exclude;
             pointer-events: none;
-            box-shadow: 0 0 25px rgba(29, 185, 84, 0.25); /* Hafif dış parlama */
+            box-shadow: 0 0 25px rgba(29, 185, 84, 0.25);
         }
 
         #game-image {
-            height: 100%; /* Wrapper yüksekliğine uy */
-            width: auto;  /* Genişliği orantılı ayarla */
-            object-fit: contain;
-            border-radius: 10px;
-            background: #000; 
-            display: block;
+            height: 100%; width: auto; object-fit: contain; border-radius: 10px; background: #000; display: block;
         }
 
         .input-game {
@@ -260,8 +297,15 @@
         </div>
 
         <div id="game-screen" class="screen">
-            <div style="color: #aaa; margin-bottom: 10px; font-weight: bold; font-size: 0.9rem;">KALAN PAS: <span id="remaining-pass-text" style="color: #fff;">0</span></div>
-
+            <div class="game-header-container">
+                <div class="catolify-brand">
+                    <svg class="spotify-icon-orange" width="32" height="32" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M84 0C37.6 0 0 37.6 0 84s37.6 84 84 84 84-37.6 84-84S130.4 0 84 0zm38.8 121.2c-1.5 2.5-4.5 3.3-7 1.8-19.2-11.7-43.4-14.3-71.9-7.9-2.8.7-5.5-1.1-6.2-3.9-.7-2.8 1.1-5.5 3.9-6.2 31.4-7.2 58.3-4.2 80.1 9.2 2.5 1.5 3.3 4.5 1.8 7zm10.2-22.7c-1.9 3-5.9 4-8.9 2.1-22.1-13.6-55.8-17.5-81.9-9.6-3.4 1-7-1-8.1-4.4-1-3.4 1-7 4.4-8.1 30-9.1 67.2-4.7 92.4 10.8 3 2 4 6 2.1 8.9zm1.3-23.7c-26.5-15.8-70.3-17.2-95.6-9.5-4.1 1.3-8.5-1.1-9.8-5.2-1.3-4.1 1.1-8.5 5.2-9.8 29.5-9 78.2-7.3 108.9 10.9 3.7 2.2 4.9 7 2.7 10.7-2.2 3.6-6.9 4.8-10.6 2.7z"/>
+                    </svg>
+                    <span class="catolify-text">ÇATOLİFY</span>
+                </div>
+                <div class="pass-info">KALAN PAS: <span id="remaining-pass-text">0</span></div>
+            </div>
             <div id="game-image-wrapper" onclick="openGameZoom()">
                 <img id="game-image" src="" alt="Soru">
             </div>

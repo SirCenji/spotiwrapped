@@ -3,31 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tahmin Et Çatom</title>
+    <title>Bilsene Çatom</title>
     <style>
-        /* --- GENEL TASARIM --- */
+        /* --- SPOTIFY NEON TEMA --- */
         :root {
-            --bg-color: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.8);
-            --accent-color: #38bdf8;
-            --text-color: #f1f5f9;
-            --success-color: #22c55e;
-            --error-color: #ef4444;
-            --warning-color: #f59e0b; /* Pas butonu için turuncu */
+            --spotify-black: #000000;
+            --spotify-green: #1db954;
+            --neon-orange: #ff6b00;
+            --spotify-white: #ffffff;
+            --spotify-gray: #b3b3b3;
+            --error-red: #e91429;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Circular', 'Helvetica Neue', Helvetica, Arial, sans-serif; }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--spotify-black);
+            /* Spot ışığı efekti */
+            background-image: radial-gradient(circle at 50% -10%, rgba(29, 185, 84, 0.15), transparent 50%);
+            color: var(--spotify-white);
             height: 100vh;
             width: 100vw;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-image: radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.05) 0%, transparent 60%);
+        }
+
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
 
         .screen {
@@ -39,192 +49,258 @@
             align-items: center;
             justify-content: center;
             opacity: 0;
-            transition: opacity 0.5s;
+            transition: opacity 0.5s ease;
             padding: 20px;
         }
 
         .screen.active { display: flex; opacity: 1; z-index: 10; }
 
-        .btn {
-            padding: 12px 40px;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 50px;
-            background: var(--accent-color);
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);
-        }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5); }
-
-        /* Pas Butonu Stili */
-        .btn-pass {
-            background: var(--warning-color);
-            color: #000;
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
-        }
-        .btn-pass:hover { box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
-
         /* --- 1. GİRİŞ EKRANI --- */
-        #start-screen h1 {
-            font-size: 3.5rem;
-            margin-bottom: 20px;
+        .header-area {
             text-align: center;
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
+            z-index: 2;
         }
 
-        /* Pas Giriş Alanı Stili */
-        .setting-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .logo-glow {
+            filter: drop-shadow(0 0 15px rgba(29, 185, 84, 0.4));
             margin-bottom: 10px;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .setting-group input {
-            width: 60px;
-            padding: 5px;
-            border-radius: 5px;
-            border: 1px solid #475569;
-            background: transparent;
-            color: white;
-            text-align: center;
-            font-size: 1.1rem;
         }
 
-        /* --- 2. OYUN EKRANI --- */
-        #game-image-wrapper {
-            position: relative;
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+
+        .subtitle {
+            color: var(--spotify-gray);
+            font-size: 0.95rem;
+            font-weight: 400;
+        }
+
+        /* --- NEON KUTU --- */
+        .glow-box {
             width: 100%;
-            max-width: 450px; 
-            height: 60vh; /* Pas sayacı için biraz yer açtım */
-            border-radius: 15px;
-            overflow: hidden;
-            background: #000;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 420px;
+            padding: 40px 30px;
+            border-radius: 16px;
+            position: relative;
+            background: rgba(18, 18, 18, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            z-index: 1;
+        }
+
+        .glow-box::before {
+            content: ""; position: absolute; inset: -2px; border-radius: 18px; padding: 2px;
+            background: linear-gradient(135deg, var(--spotify-green), var(--neon-orange)); 
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            z-index: -1;
+            box-shadow: 0 0 20px rgba(29, 185, 84, 0.2), 0 0 10px rgba(255, 107, 0, 0.2);
+        }
+        
+        .box-title {
+            text-align: center; color: var(--spotify-gray); font-size: 0.9rem;
+            margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .input-styled-wrapper { position: relative; width: 100%; }
+        .input-styled-wrapper label {
+            display: block; font-size: 0.8rem; color: var(--spotify-green); margin-bottom: 8px; font-weight: 700; padding-left: 5px;
+        }
+
+        input[type="number"] {
+            width: 100%; background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); 
+            color: white; padding: 15px; border-radius: 8px; font-size: 1rem; text-align: center; outline: none; transition: all 0.3s;
+        }
+        input[type="number"]:focus { 
+            border-color: var(--spotify-green); box-shadow: 0 0 15px rgba(29, 185, 84, 0.2); background-color: rgba(29, 185, 84, 0.1); 
+        }
+
+        .btn-start {
+            width: 100%; padding: 16px; 
+            background: linear-gradient(90deg, var(--spotify-green), #1ed760); 
+            border: none; border-radius: 8px; color: #000; font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(29, 185, 84, 0.4); transition: transform 0.2s, box-shadow 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-start:hover { transform: scale(1.02); box-shadow: 0 6px 30px rgba(29, 185, 84, 0.6); }
+
+        /* --- 2. OYUN EKRANI DÜZELTMESİ --- */
+        #game-image-wrapper {
+            /* width: 100% yerine auto kullanıyoruz ki resme yapışsın */
+            width: auto;
+            max-width: 100%;
+            height: 55vh; 
+            
+            display: inline-flex; /* Sadece içeriği kadar yer kapla */
+            align-items: center;
+            justify-content: center;
+            position: relative;
             cursor: zoom-in;
-            transition: border-color 0.3s;
-        }
-        
-        #game-image-wrapper:hover { border-color: var(--accent-color); }
-        #game-image { width: 100%; height: 100%; object-fit: contain; }
-
-        .zoom-hint {
-            position: absolute; bottom: 10px; right: 10px;
-            background: rgba(0,0,0,0.6); padding: 5px 10px;
-            border-radius: 20px; font-size: 0.8rem; pointer-events: none;
+            margin-bottom: 20px;
+            
+            /* Çerçeve kalınlığı */
+            padding: 3px; 
+            border-radius: 14px;
+            background: transparent;
         }
 
-        .input-group {
-            display: flex; gap: 10px; margin-top: 20px; width: 100%; max-width: 450px;
+        /* Resim Çerçevesi Gradyanı */
+        #game-image-wrapper::before {
+            content: ""; position: absolute; inset: 0; border-radius: 14px; padding: 2px;
+            background: linear-gradient(135deg, var(--spotify-green), var(--neon-orange));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor; mask-composite: exclude;
+            pointer-events: none;
+            box-shadow: 0 0 25px rgba(29, 185, 84, 0.25); /* Hafif dış parlama */
         }
-        
-        input[type="text"] {
-            flex: 1; padding: 15px; border-radius: 8px;
-            border: 1px solid #475569; background: rgba(255, 255, 255, 0.05);
-            color: white; outline: none; font-size: 1.1rem;
-        }
-        input[type="text"]:focus { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.1); }
 
-        .pass-info {
-            color: var(--warning-color);
-            margin-top: 10px;
-            font-weight: bold;
-            font-size: 0.9rem;
+        #game-image {
+            height: 100%; /* Wrapper yüksekliğine uy */
+            width: auto;  /* Genişliği orantılı ayarla */
+            object-fit: contain;
+            border-radius: 10px;
+            background: #000; 
+            display: block;
         }
+
+        .input-game {
+            width: 100%; padding: 14px; border-radius: 4px; border: 1px solid #333;
+            background-color: #121212; color: #fff; font-size: 1rem; outline: none; margin-bottom: 15px;
+        }
+        .input-game:focus { border-color: var(--spotify-green); }
+
+        .btn-action {
+            width: 100%; padding: 14px; border-radius: 500px; border: none; font-weight: 700; cursor: pointer; margin-top: 10px;
+        }
+        .btn-green { background-color: var(--spotify-green); color: #000; transition: 0.2s; }
+        .btn-green:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(29, 185, 84, 0.4); }
+        .btn-pass { background: transparent; border: 1px solid #727272; color: #ccc; transition: 0.2s; }
+        .btn-pass:hover { border-color: var(--neon-orange); color: var(--neon-orange); }
 
         /* --- 3. SONUÇ EKRANI --- */
-        #result-screen { justify-content: flex-start; overflow-y: auto; padding-top: 40px; }
-        
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); 
-            gap: 20px; width: 100%; max-width: 1000px; padding-bottom: 50px;
+        #result-screen { 
+            justify-content: flex-start; overflow-y: auto; padding-top: 40px; text-align: center; 
         }
-        
-        .result-card {
-            background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            cursor: pointer; transition: transform 0.2s;
-            border: 1px solid rgba(255,255,255,0.05); display: flex; flex-direction: column;
-        }
-        
-        .result-card:hover { transform: translateY(-5px); border-color: var(--accent-color); }
-        .result-card img { width: 100%; height: 280px; object-fit: cover; }
-        .card-info { padding: 12px; font-size: 0.9rem; text-align: center; }
-        .correct { border-bottom: 4px solid var(--success-color); }
-        .wrong { border-bottom: 4px solid var(--error-color); }
 
-        /* --- 4. MODAL --- */
-        #modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: none; z-index: 100;
-            flex-direction: column; align-items: center; justify-content: center;
-            opacity: 0; transition: opacity 0.3s;
+        .result-header {
+            margin-bottom: 30px; width: 100%; display: flex; flex-direction: column; align-items: center;
         }
-        #modal.open { display: flex; opacity: 1; }
-        #modal img { max-height: 85vh; max-width: 95vw; border-radius: 10px; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
-        #modal-details { text-align: center; margin-top: 20px; display: none; }
-        #close-btn { position: absolute; top: 20px; right: 30px; font-size: 3rem; cursor: pointer; color: #fff; z-index: 101; }
+
+        .grid-container {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px; width: 100%; max-width: 1000px; padding-bottom: 50px; justify-content: center;
+        }
+
+        .result-card {
+            background-color: #181818; padding: 12px; border-radius: 8px; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center; transition: 0.2s; border: 1px solid #282828;
+        }
+        .result-card:hover { 
+            background-color: #222; border-color: var(--spotify-green); transform: translateY(-5px);
+        }
+        
+        .result-card img {
+            width: 100%; height: 250px; object-fit: contain; background: #000; border-radius: 4px; margin-bottom: 10px;
+        }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .dot-green { background: var(--spotify-green); box-shadow: 0 0 8px var(--spotify-green); } 
+        .dot-red { background: var(--error-red); }
+
+        /* Modal */
+        #modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
+            display: none; z-index: 100; flex-direction: column; align-items: center; justify-content: center;
+        }
+        #modal.open { display: flex; }
+        #modal img { max-height: 85vh; max-width: 95vw; object-fit: contain; }
+        #close-btn { position: absolute; top: 20px; right: 30px; font-size: 3rem; cursor: pointer; color: #fff; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
 
     </style>
 </head>
 <body>
 
-    <div id="start-screen" class="screen active">
-        <h1>Tahmin Et</h1>
-        <p style="color: #94a3b8; font-size: 1.2rem; margin-bottom: 20px;">Bu özet kime ait?</p>
+    <div class="container">
         
-        <div class="setting-group">
-            <label for="pass-count-input">Pas Hakkı:</label>
-            <input type="number" id="pass-count-input" value="3" min="0" max="10">
+        <div id="start-screen" class="screen active">
+            <div class="header-area">
+                <svg class="logo-glow" width="80" height="80" viewBox="0 0 168 168" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#1DB954" d="M84 0C37.6 0 0 37.6 0 84s37.6 84 84 84 84-37.6 84-84S130.4 0 84 0zm38.8 121.2c-1.5 2.5-4.5 3.3-7 1.8-19.2-11.7-43.4-14.3-71.9-7.9-2.8.7-5.5-1.1-6.2-3.9-.7-2.8 1.1-5.5 3.9-6.2 31.4-7.2 58.3-4.2 80.1 9.2 2.5 1.5 3.3 4.5 1.8 7zm10.2-22.7c-1.9 3-5.9 4-8.9 2.1-22.1-13.6-55.8-17.5-81.9-9.6-3.4 1-7-1-8.1-4.4-1-3.4 1-7 4.4-8.1 30-9.1 67.2-4.7 92.4 10.8 3 2 4 6 2.1 8.9zm1.3-23.7c-26.5-15.8-70.3-17.2-95.6-9.5-4.1 1.3-8.5-1.1-9.8-5.2-1.3-4.1 1.1-8.5 5.2-9.8 29.5-9 78.2-7.3 108.9 10.9 3.7 2.2 4.9 7 2.7 10.7-2.2 3.6-6.9 4.8-10.6 2.7z"/>
+                </svg>
+                <h1>Yıllık Özet</h1>
+                <p class="subtitle">Spoti özetlerini bilebilir misin Çatom?</p>
+            </div>
+
+            <div class="glow-box">
+                <p class="box-title">Oyun Ayarları</p>
+                <div class="input-styled-wrapper">
+                    <label>Pas Hakkı</label>
+                    <input type="number" id="pass-count-input" value="3" min="0" max="10">
+                </div>
+                <button class="btn-start" onclick="startGame()">
+                    <span>▶</span> OYUNU BAŞLAT
+                </button>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center; color: #555; font-size: 0.8rem;">
+                <p><strong style="color: var(--spotify-green);">İpucu:</strong> Görselleri yakınlaştırmak için üzerlerine tıklayın.</p>
+            </div>
         </div>
 
-        <button class="btn" onclick="startGame()">Oyunu Başlat</button>
-    </div>
+        <div id="game-screen" class="screen">
+            <div style="color: #aaa; margin-bottom: 10px; font-weight: bold; font-size: 0.9rem;">KALAN PAS: <span id="remaining-pass-text" style="color: #fff;">0</span></div>
 
-    <div id="game-screen" class="screen">
-        <div id="pass-display" class="pass-info">Kalan Pas: <span id="remaining-pass-text">0</span></div>
-
-        <div id="game-image-wrapper" onclick="openGameZoom()">
-            <img id="game-image" src="" alt="Soru">
-            <div class="zoom-hint">🔍</div>
+            <div id="game-image-wrapper" onclick="openGameZoom()">
+                <img id="game-image" src="" alt="Soru">
+            </div>
+            
+            <div style="width: 100%; max-width: 500px;">
+                <label style="display:block; color:white; margin-bottom:5px;">Tahmininiz:</label>
+                <input type="text" id="user-guess" class="input-game" placeholder="İsim yazın..." autocomplete="off">
+                
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-action btn-green" onclick="submitGuess()" style="flex: 2;">TAHMİN ET</button>
+                    <button class="btn-action btn-pass" onclick="passQuestion()" style="flex: 1;">PAS GEÇ</button>
+                </div>
+            </div>
         </div>
-        
-        <div class="input-group">
-            <input type="text" id="user-guess" placeholder="Sahibini yaz..." autocomplete="off">
-            <button class="btn" onclick="submitGuess()" style="margin-top: 0; border-radius: 0 8px 8px 0; padding: 12px 20px;">→</button>
-            <button class="btn btn-pass" onclick="passQuestion()" style="margin-top: 0; border-radius: 8px; padding: 12px 20px;">Pas</button>
-        </div>
-        <p style="color: #64748b; margin-top: 15px; font-size: 0.9rem;">:)</p>
-    </div>
 
-    <div id="result-screen" class="screen">
-        <h2 style="margin-bottom: 30px; font-size: 2rem;">Sonuçlar</h2>
-        <div class="grid-container" id="results-grid"></div>
-        <button class="btn" onclick="location.reload()">Yeni Oyun (Karıştır)</button>
+        <div id="result-screen" class="screen">
+            <div class="result-header">
+                <h2 style="font-size: 3rem; margin-bottom: 10px; font-weight: 900; letter-spacing: -1px; text-shadow: 0 0 30px rgba(29, 185, 84, 0.3);">SONUÇLAR</h2>
+                <div id="score-summary" style="font-size: 1.2rem; color: #b3b3b3; font-weight: 500;"></div>
+            </div>
+
+            <div class="grid-container" id="results-grid"></div>
+            <button class="btn-action btn-green" onclick="location.reload()" style="max-width: 300px; margin-bottom: 30px;">TEKRAR OYNA</button>
+        </div>
+
     </div>
 
     <div id="modal">
         <span id="close-btn" onclick="closeModal()">&times;</span>
         <img id="modal-img" src="">
-        <div id="modal-details">
-            <h2 id="modal-real" style="color: var(--accent-color); font-size: 1.8rem;"></h2>
-            <p id="modal-guess" style="color: #ccc; font-size: 1.2rem; margin-top: 5px;"></p>
+        <div id="modal-details" style="text-align: center; margin-top: 15px; display: none;">
+            <h2 id="modal-real" style="color: var(--spotify-green);"></h2>
+            <p id="modal-guess" style="color: #ccc;"></p>
         </div>
     </div>
 
     <script>
         // ==========================================================
-        // DÜZENLEME ALANI: Resimlerini buraya ekle. Sıralama önemli değil, karışacak.
+        // DÜZENLEME ALANI: Resimlerini buraya ekle.
         // ==========================================================
         const gameData = [
             { id: 1, image: "burak.jpg", owner: "Burak" },
@@ -244,9 +320,6 @@
             { id: 15, image: "kobe.jpg", owner: "Kobe" },
             { id: 16, image: "lala.jpg", owner: "Lala" },
             { id: 17, image: "seyma.jpg", owner: "Şeyma" }
-
-
-
         ];
         // ==========================================================
 
@@ -254,7 +327,6 @@
         let userGuesses = [];
         let remainingPasses = 3;
 
-        // --- KARIŞTIRMA (SHUFFLE) FONKSİYONU ---
         function shuffleArray(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -268,12 +340,10 @@
         }
 
         function startGame() {
-            // Başlangıç pas sayısını inputtan al
             const passInput = document.getElementById('pass-count-input').value;
             remainingPasses = parseInt(passInput) || 0;
             updatePassDisplay();
 
-            // Oyunu başlatmadan önce listeyi karıştırıyoruz!
             shuffleArray(gameData);
 
             currentIndex = 0;
@@ -319,23 +389,13 @@
                 return;
             }
 
-            // Pas hakkını düşür
             remainingPasses--;
             updatePassDisplay();
 
-            // Mevcut soruyu diziden alıp (splice) en sona ekle (push)
             const currentItem = gameData[currentIndex];
-            
-            // Diziden mevcut elemanı çıkarıyoruz
             gameData.splice(currentIndex, 1);
-            
-            // En sona ekliyoruz
             gameData.push(currentItem);
 
-            // ÖNEMLİ: currentIndex'i arttırmıyoruz çünkü sıradaki eleman
-            // kaydırma işlemiyle zaten şu anki indexe geldi.
-            
-            // Inputu temizle ve yeni gelen soruyu yükle
             document.getElementById('user-guess').value = "";
             loadNextQuestion();
         }
@@ -346,31 +406,45 @@
 
         function finishGame() {
             const grid = document.getElementById('results-grid');
+            const scoreSummary = document.getElementById('score-summary');
             grid.innerHTML = "";
+            
+            let correctCount = 0;
+            let wrongCount = 0;
 
             gameData.forEach((item, idx) => {
                 const guess = userGuesses[idx];
                 const isCorrect = guess.toLowerCase() === item.owner.toLowerCase();
-                const statusClass = isCorrect ? 'correct' : 'wrong';
+                
+                if(isCorrect) correctCount++; else wrongCount++;
+                
+                const dotClass = isCorrect ? 'dot-green' : 'dot-red';
 
                 const card = document.createElement('div');
-                card.className = `result-card ${statusClass}`;
+                card.className = 'result-card';
                 card.onclick = () => openResultModal(item, guess);
 
                 card.innerHTML = `
                     <img src="${item.image}">
-                    <div class="card-info">
-                        <div style="color: #94a3b8;">Sen: <strong style="color: #fff;">${guess}</strong></div>
-                        <div style="color: var(--accent-color);">Gerçek: <strong>${item.owner}</strong></div>
+                    <div style="width:100%; text-align:left;">
+                        <div style="color:white; font-weight:bold; margin-bottom:5px;">
+                            <span class="status-dot ${dotClass}"></span>${item.owner}
+                        </div>
+                        <div style="color:#b3b3b3; font-size:0.85rem;">Tahmin: ${guess}</div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
 
+            scoreSummary.innerHTML = `
+                <span style="color: var(--spotify-green); font-weight: bold; text-shadow: 0 0 10px rgba(29, 185, 84, 0.5);">${correctCount} Doğru</span>
+                <span style="margin: 0 10px; color:#555;">|</span>
+                <span style="color: var(--error-red); font-weight: bold;">${wrongCount} Yanlış</span>
+            `;
+
             showScreen('result-screen');
         }
 
-        // --- ZOOM FONKSİYONLARI ---
         function openGameZoom() {
             const modal = document.getElementById('modal');
             const currentImgSrc = gameData[currentIndex].image;
@@ -382,7 +456,7 @@
         function openResultModal(item, guess) {
             const modal = document.getElementById('modal');
             document.getElementById('modal-img').src = item.image;
-            document.getElementById('modal-real').innerText = "Gerçek Sahip: " + item.owner;
+            document.getElementById('modal-real').innerText = item.owner;
             document.getElementById('modal-guess').innerText = "Senin Tahminin: " + guess;
             document.getElementById('modal-details').style.display = 'block';
             modal.classList.add('open');
@@ -399,6 +473,3 @@
     </script>
 </body>
 </html>
-
-
-

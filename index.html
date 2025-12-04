@@ -13,6 +13,7 @@
             --text-color: #f1f5f9;
             --success-color: #22c55e;
             --error-color: #ef4444;
+            --warning-color: #f59e0b; /* Pas butonu için turuncu */
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
@@ -59,6 +60,14 @@
         }
         .btn:hover { transform: scale(1.05); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.5); }
 
+        /* Pas Butonu Stili */
+        .btn-pass {
+            background: var(--warning-color);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+        }
+        .btn-pass:hover { box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); }
+
         /* --- 1. GİRİŞ EKRANI --- */
         #start-screen h1 {
             font-size: 3.5rem;
@@ -69,12 +78,34 @@
             -webkit-text-fill-color: transparent;
         }
 
+        /* Pas Giriş Alanı Stili */
+        .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .setting-group input {
+            width: 60px;
+            padding: 5px;
+            border-radius: 5px;
+            border: 1px solid #475569;
+            background: transparent;
+            color: white;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
         /* --- 2. OYUN EKRANI --- */
         #game-image-wrapper {
             position: relative;
             width: 100%;
-            max-width: 450px; /* Dikey Resim Genişliği */
-            height: 70vh; 
+            max-width: 450px; 
+            height: 60vh; /* Pas sayacı için biraz yer açtım */
             border-radius: 15px;
             overflow: hidden;
             background: #000;
@@ -103,6 +134,13 @@
             color: white; outline: none; font-size: 1.1rem;
         }
         input[type="text"]:focus { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.1); }
+
+        .pass-info {
+            color: var(--warning-color);
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
 
         /* --- 3. SONUÇ EKRANI --- */
         #result-screen { justify-content: flex-start; overflow-y: auto; padding-top: 40px; }
@@ -143,11 +181,19 @@
 
     <div id="start-screen" class="screen active">
         <h1>Tahmin Et</h1>
-        <p style="color: #94a3b8; font-size: 1.2rem; margin-bottom: 30px;">Bu özet kime ait?</p>
+        <p style="color: #94a3b8; font-size: 1.2rem; margin-bottom: 20px;">Bu özet kime ait?</p>
+        
+        <div class="setting-group">
+            <label for="pass-count-input">Pas Hakkı:</label>
+            <input type="number" id="pass-count-input" value="3" min="0" max="10">
+        </div>
+
         <button class="btn" onclick="startGame()">Oyunu Başlat</button>
     </div>
 
     <div id="game-screen" class="screen">
+        <div id="pass-display" class="pass-info">Kalan Pas: <span id="remaining-pass-text">0</span></div>
+
         <div id="game-image-wrapper" onclick="openGameZoom()">
             <img id="game-image" src="" alt="Soru">
             <div class="zoom-hint">🔍</div>
@@ -155,7 +201,8 @@
         
         <div class="input-group">
             <input type="text" id="user-guess" placeholder="Sahibini yaz..." autocomplete="off">
-            <button class="btn" onclick="submitGuess()" style="margin-top: 0; border-radius: 0 8px 8px 0;">→</button>
+            <button class="btn" onclick="submitGuess()" style="margin-top: 0; border-radius: 0 8px 8px 0; padding: 12px 20px;">→</button>
+            <button class="btn btn-pass" onclick="passQuestion()" style="margin-top: 0; border-radius: 8px; padding: 12px 20px;">Pas</button>
         </div>
         <p style="color: #64748b; margin-top: 15px; font-size: 0.9rem;">:)</p>
     </div>
@@ -180,7 +227,7 @@
         // DÜZENLEME ALANI: Resimlerini buraya ekle. Sıralama önemli değil, karışacak.
         // ==========================================================
         const gameData = [
-                { id: 1, image: "burak.jpg", owner: "Burak" },
+            { id: 1, image: "burak.jpg", owner: "Burak" },
             { id: 2, image: "kübra.jpg", owner: "Kübra" },
             { id: 3, image: "emrecan.jpg", owner: "Emrecan" },
             { id: 4, image: "kadir.jpg", owner: "Kadir" },
@@ -194,13 +241,12 @@
             { id: 12, image: "sueda.jpeg", owner: "Sueda" },           
             { id: 13, image: "sema.png", owner: "Sema" },
             { id: 14, image: "ebru.png", owner: "Ebru" }
-
-
         ];
         // ==========================================================
 
         let currentIndex = 0;
         let userGuesses = [];
+        let remainingPasses = 3;
 
         // --- KARIŞTIRMA (SHUFFLE) FONKSİYONU ---
         function shuffleArray(array) {
@@ -216,6 +262,11 @@
         }
 
         function startGame() {
+            // Başlangıç pas sayısını inputtan al
+            const passInput = document.getElementById('pass-count-input').value;
+            remainingPasses = parseInt(passInput) || 0;
+            updatePassDisplay();
+
             // Oyunu başlatmadan önce listeyi karıştırıyoruz!
             shuffleArray(gameData);
 
@@ -223,6 +274,10 @@
             userGuesses = [];
             loadNextQuestion();
             showScreen('game-screen');
+        }
+
+        function updatePassDisplay() {
+            document.getElementById('remaining-pass-text').innerText = remainingPasses;
         }
 
         function loadNextQuestion() {
@@ -249,6 +304,33 @@
 
             userGuesses.push(val);
             currentIndex++;
+            loadNextQuestion();
+        }
+
+        function passQuestion() {
+            if (remainingPasses <= 0) {
+                alert("Pas hakkın kalmadı!");
+                return;
+            }
+
+            // Pas hakkını düşür
+            remainingPasses--;
+            updatePassDisplay();
+
+            // Mevcut soruyu diziden alıp (splice) en sona ekle (push)
+            const currentItem = gameData[currentIndex];
+            
+            // Diziden mevcut elemanı çıkarıyoruz
+            gameData.splice(currentIndex, 1);
+            
+            // En sona ekliyoruz
+            gameData.push(currentItem);
+
+            // ÖNEMLİ: currentIndex'i arttırmıyoruz çünkü sıradaki eleman
+            // kaydırma işlemiyle zaten şu anki indexe geldi.
+            
+            // Inputu temizle ve yeni gelen soruyu yükle
+            document.getElementById('user-guess').value = "";
             loadNextQuestion();
         }
 
@@ -311,9 +393,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
